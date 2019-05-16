@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 var apiKey string
@@ -20,8 +21,14 @@ type Translation struct {
 }
 
 func main() {
+	path, err := os.Executable()
+	checkError(err)
+	dir := filepath.Dir(path)
+	fmt.Println(path) // the path to the current file
+	fmt.Println(dir)  // the directory of the current file
+
 	// Open source CSV file
-	source, err := os.Open("source.csv")
+	source, err := os.Open(filepath.Join(dir, "source.csv"))
 	checkError(err)
 	defer source.Close()
 
@@ -30,7 +37,7 @@ func main() {
 	checkError(err)
 
 	// Open output CSV file
-	output, err := os.OpenFile("output.csv", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	output, err := os.OpenFile(filepath.Join(dir, "output.csv"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	checkError(err)
 
 	// Writer for output CSV file
@@ -59,7 +66,7 @@ func translateText(text string) string {
 	q := req.URL.Query()
 	q.Add("auth_key", apiKey)
 	q.Add("text", text)
-	q.Add("target_lang", "EN")
+	q.Add("target_lang", "NL")
 	req.URL.RawQuery = q.Encode()
 
 	// Send request to the server
